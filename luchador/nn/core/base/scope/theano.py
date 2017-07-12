@@ -5,6 +5,7 @@ import logging
 
 __all__ = [
     'VariableScope', 'variable_scope', 'get_variable_scope', 'name_scope',
+    'get_scoped_name',
 ]
 
 _LG = logging.getLogger(__name__)
@@ -24,6 +25,10 @@ def _set_flag(flag):
 def _set_scope(scope):
     """Set scope value. Internal use only"""
     # pylint: disable=global-statement
+    if not scope.startswith('/'):
+        raise RuntimeError(
+            'Implementation Error: full scope path must startwith "/".')
+
     global _CURRENT_VARIABLE_SCOPE
     _CURRENT_VARIABLE_SCOPE = scope
 
@@ -59,13 +64,20 @@ def name_scope(  # pylint: disable=unused-argument
     return _NameScope()
 
 
+def get_scoped_name(name):
+    """Build scoped name like unix directory style."""
+    if name.startswith('/'):
+        return name
+    scope = get_variable_scope().name
+    if not scope.endswith('/'):
+        scope += '/'
+    return '{}{}'.format(scope, name)
+
+
 class VariableScope(object):
     """Mock Tensorflow's VariableScope to provide variable name space"""
     def __init__(self, reuse, name='/'):
-        name = (
-            name if name.startswith('/') else
-            '/'.join([_get_scope(), name])
-        )
+        name = get_scoped_name(name)
         self.name = name
         self.reuse = reuse
 

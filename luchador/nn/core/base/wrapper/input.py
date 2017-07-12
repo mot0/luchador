@@ -1,7 +1,6 @@
 """Define base Input type"""
 from __future__ import absolute_import
 
-from ..scope import get_variable_scope
 from .store import register, retrieve
 from .wrapper import BaseWrapper
 
@@ -13,7 +12,8 @@ class BaseInput(BaseWrapper):
     def __init__(self, tensor, shape, name, dtype):
         super(BaseInput, self).__init__(
             tensor=tensor, shape=shape, name=name, dtype=dtype)
-        register('input', name, self)
+        if name:
+            register('input', name, self)
 
 
 def get_input(name):
@@ -28,10 +28,4 @@ def get_input(name):
     -------
     Input
     """
-    try:
-        scope = get_variable_scope().name
-        name_ = '{}/{}'.format(scope, name) if scope else name
-        return retrieve('input', name_)
-    except ValueError:
-        pass
     return retrieve('input', name)

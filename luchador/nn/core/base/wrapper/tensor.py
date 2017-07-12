@@ -1,7 +1,6 @@
 """Define base Tensor type"""
 from __future__ import absolute_import
 
-from ..scope import get_variable_scope
 from .store import register, retrieve
 from .wrapper import BaseWrapper
 
@@ -53,12 +52,6 @@ def get_tensor(name):
     -------
     Tensor
     """
-    try:
-        scope = get_variable_scope().name
-        name_ = '{}/{}'.format(scope, name) if scope else name
-        return retrieve('tensor', name_)
-    except ValueError:
-        pass
     return retrieve('tensor', name)
 
 

@@ -91,7 +91,7 @@ def create_ones_tensor(shape, dtype, name='ones_tensor'):
 ###############################################################################
 def gen_scope(test_id, suffix=None):
     """Generate TestCase-specific scope name"""
-    scope = test_id.replace('.', '/')
+    scope = '/' + test_id.replace('.', '/')
     if suffix:
         scope = '{}/{}'.format(scope, suffix)
     return scope
@@ -101,4 +101,4 @@ class TestCase(unittest.TestCase):
     """TestCase with unique scope generation"""
     def get_scope(self, suffix=None):
         """Generate test-case-specific scope name"""
-        return gen_scope(self.id().replace('.', '/'), suffix)
+        return gen_scope(self.id(), suffix)

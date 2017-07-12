@@ -10,7 +10,6 @@ import theano
 import theano.tensor as T
 
 from ...base import wrapper as base_wrapper
-from ...base import scope as scope_module
 from ...base.initializer import fetch_initializer
 
 __all__ = [
@@ -106,15 +105,6 @@ class TensorMixin(object):  # pylint: disable=too-few-public-methods
         return Tensor(tensor=_tensor, shape=_shape, name=name)
 
 
-def _get_scope():
-    return scope_module.get_variable_scope()
-
-
-def _prefix_with_scope(name):
-    scope = _get_scope().name
-    return '{}/{}'.format(scope, name) if scope else name
-
-
 class Variable(TensorMixin, base_wrapper.BaseVariable):
     """Wrap SharedVariable object for storing network parameters"""
     def __init__(self, variable, name=None, trainable=True):
@@ -126,7 +116,6 @@ class Variable(TensorMixin, base_wrapper.BaseVariable):
             overwritten with this name, otherwise, name is constructed in the
             manner as Tensorflow.
         """
-        name = _prefix_with_scope(name or variable.name)
         val = variable.get_value()
         super(Variable, self).__init__(
             tensor=variable, shape=val.shape, name=name,
@@ -145,7 +134,6 @@ class Tensor(TensorMixin, base_wrapper.BaseTensor):
         """
         if -1 in shape:
             shape = [None if val < 0 else val for val in shape]
-        name = _prefix_with_scope(name) if name else None
         super(Tensor, self).__init__(
             tensor=tensor, shape=shape, name=name, dtype=tensor.dtype)
 
@@ -176,7 +164,6 @@ class Input(TensorMixin, base_wrapper.BaseInput):
           name (str): The name of the resulting object.
           dtype (NumPy dtype or None): If None, default dtype(floatX) is used
         """
-        name = _prefix_with_scope(name) if name else None
         tensor = _create_placeholder(dtype, len(shape), name)
         super(Input, self).__init__(
             tensor=tensor, shape=shape, name=name, dtype=tensor.dtype)
@@ -185,7 +172,6 @@ class Input(TensorMixin, base_wrapper.BaseInput):
 class Operation(base_wrapper.BaseOperation):
     """Represents operation"""
     def __init__(self, op, name=None):
-        name = _prefix_with_scope(name) if name else None
         super(Operation, self).__init__(op=op, name=name)
 
 
@@ -211,9 +197,6 @@ def make_variable(
     kwargs
         Other arguments passed to ``theano.shared`` function.
     """
-    scope = _get_scope().name
-    name_ = '{}/{}'.format(scope, name) if scope else name
-
     if not initializer:
         initializer = fetch_initializer('NormalInitializer')(dtype=dtype)
 
@@ -227,6 +210,6 @@ def make_variable(
     return Variable(
         theano.shared(
             value=np.array(initializer.sample(shape), dtype=dtype),
-            name=name_, allow_downcast=True, **kwargs
+            name=name, allow_downcast=True, **kwargs
         ), name=name, trainable=trainable,
     )

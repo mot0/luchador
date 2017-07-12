@@ -4,6 +4,8 @@ from __future__ import absolute_import
 import logging
 from collections import OrderedDict
 
+from ..scope import get_scoped_name
+
 __all__ = ['register', 'retrieve']
 _LG = logging.getLogger(__name__)
 # pylint: disable=redefined-builtin
@@ -71,6 +73,7 @@ def _retrieve_operation(name):
 
 def register(type, name, obj):
     """Register object"""
+    name = get_scoped_name(name)
     if type == 'input':
         _register_input(name, obj)
     elif type == 'variable':
@@ -85,6 +88,7 @@ def register(type, name, obj):
 
 def retrieve(type, name):
     """Retrieve object"""
+    name = get_scoped_name(name)
     if type == 'input':
         return _retrieve_input(name)
     elif type == 'variable':

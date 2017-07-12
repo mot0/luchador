@@ -1,7 +1,6 @@
 """Define base Variable type"""
 from __future__ import absolute_import
 
-from ..scope import get_variable_scope
 from .store import register, retrieve
 from .wrapper import BaseWrapper
 
@@ -14,7 +13,8 @@ class BaseVariable(BaseWrapper):
         super(BaseVariable, self).__init__(
             tensor=tensor, shape=shape, name=name,
             dtype=dtype, trainable=trainable)
-        register('variable', name, self)
+        if name:
+            register('variable', name, self)
 
 
 def get_variable(name):
@@ -29,10 +29,4 @@ def get_variable(name):
     -------
     Variable
     """
-    scope = get_variable_scope().name
-    try:
-        name_ = '{}/{}'.format(scope, name) if scope else name
-        return retrieve('variable', name_)
-    except ValueError:
-        pass
     return retrieve('variable', name)

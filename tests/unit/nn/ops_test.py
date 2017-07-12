@@ -13,7 +13,7 @@ _BACKEND = luchador.get_nn_backend()
 
 ###############################################################################
 # Test gradients
-class TestComputeGradiens(fixture.TestCase):
+class TestComputeGradients(fixture.TestCase):
     """Test gradient computation"""
     def test_compute_gradients(self):
         """compute_gradients returns None for non-trainable wrt"""
