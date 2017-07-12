@@ -16,7 +16,7 @@ class _ScopeTestCase(TestCase):
 
     def tearDown(self):
         # After each test, scope should be reset to root
-        expected, found = '/', be._get_scope()
+        expected, found = '', be._get_scope()
         # Sanitize global scope for the next test in case something went wrong
         be._reset()
         self.assertEqual(
@@ -24,6 +24,8 @@ class _ScopeTestCase(TestCase):
             'Variable scope was not properly closed in the last test. ')
 
     def _check_scope(self, expected, found=None):
+        if expected.startswith('~/'):
+            expected = expected[2:]
         found = found or be._get_scope()
         self.assertEqual(
             expected, found,

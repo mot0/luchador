@@ -5,14 +5,14 @@ import logging
 
 __all__ = [
     'VariableScope', 'variable_scope', 'get_variable_scope', 'name_scope',
-    'get_scoped_name',
+    'get_scoped_name'
 ]
 
 _LG = logging.getLogger(__name__)
 
 ###############################################################################
 _CURRENT_REUSE_FLAG = False
-_CURRENT_VARIABLE_SCOPE = '/'
+_CURRENT_VARIABLE_SCOPE = ''
 
 
 def _set_flag(flag):
@@ -25,10 +25,9 @@ def _set_flag(flag):
 def _set_scope(scope):
     """Set scope value. Internal use only"""
     # pylint: disable=global-statement
-    if not scope.startswith('/'):
+    if scope.startswith('/'):
         raise RuntimeError(
-            'Implementation Error: full scope path must startwith "/".')
-
+            'Implementation Error: full scope path must not startwith "/".')
     global _CURRENT_VARIABLE_SCOPE
     _CURRENT_VARIABLE_SCOPE = scope
 
@@ -46,7 +45,7 @@ def _get_scope():
 def _reset():
     """Reset variable scope and remove cached variables. For Testing"""
     _set_flag(False)
-    _set_scope('/')
+    _set_scope('')
 ###############################################################################
 
 
@@ -66,17 +65,16 @@ def name_scope(  # pylint: disable=unused-argument
 
 def get_scoped_name(name):
     """Build scoped name like unix directory style."""
-    if name.startswith('/'):
-        return name
-    scope = get_variable_scope().name
-    if not scope.endswith('/'):
-        scope += '/'
-    return '{}{}'.format(scope, name)
+    if name.startswith('~/'):
+        return name[2:]
+    if _get_scope():
+        return '{}/{}'.format(_get_scope(), name)
+    return name
 
 
 class VariableScope(object):
     """Mock Tensorflow's VariableScope to provide variable name space"""
-    def __init__(self, reuse, name='/'):
+    def __init__(self, reuse, name=''):
         name = get_scoped_name(name)
         self.name = name
         self.reuse = reuse
@@ -115,11 +113,11 @@ def variable_scope(name_or_scope, reuse=None):
     """Create new VariableScope object"""
     if isinstance(name_or_scope, VariableScope):
         if reuse:
-            return VariableScope(reuse, name_or_scope.name)
+            return VariableScope(reuse, '~/'+name_or_scope.name)
         return name_or_scope
     return VariableScope(reuse, name_or_scope)
 
 
 def get_variable_scope():
     """Return the current variable scope"""
-    return VariableScope(_get_flag(), _get_scope())
+    return VariableScope(_get_flag(), '~/'+_get_scope())

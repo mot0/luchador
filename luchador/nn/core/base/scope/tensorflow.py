@@ -5,6 +5,7 @@ import tensorflow as tf
 
 __all__ = [
     'VariableScope', 'variable_scope', 'get_variable_scope', 'name_scope',
+    'get_scoped_name',
 ]
 
 
@@ -38,3 +39,13 @@ class VariableScope(tf.VariableScope):  # pylint: disable=R0903
     """Wrap Tensorflow VariableScope class."""
     pass
 ###############################################################################
+
+
+def get_scoped_name(name):
+    """Build scoped name like unix directory style."""
+    if name.startswith('/'):
+        return name
+    scope = get_variable_scope().name
+    if not scope.endswith('/'):
+        scope += '/'
+    return '{}{}'.format(scope, name)

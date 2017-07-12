@@ -5,7 +5,7 @@ import logging
 from collections import OrderedDict
 
 from luchador.util import fetch_subclasses
-from ..core import get_variable_scope
+from ..core.base.scope import get_scoped_name
 
 __all__ = ['BaseModel', 'fetch_model', 'get_model']
 _LG = logging.getLogger(__name__)
@@ -13,9 +13,17 @@ _MODELS = OrderedDict()
 
 
 def _register(name, model):
+    name = get_scoped_name(name)
     if name in _MODELS:
         _LG.warning('Model `%s` already exists.', name)
     _MODELS[name] = model
+
+
+def _retrieve(name):
+    name = get_scoped_name(name)
+    if name not in _MODELS:
+        raise ValueError('Model `{}` does not exist.'.format(name))
+    return _MODELS.get(name)
 
 
 class BaseModel(object):  # pylint: disable=too-few-public-methods
@@ -24,13 +32,9 @@ class BaseModel(object):  # pylint: disable=too-few-public-methods
         super(BaseModel, self).__init__()
         self.input = None
         self.output = None
-
-        if name:
-            scope = get_variable_scope().name
-            if scope:
-                name = '{}/{}'.format(scope, name)
-            _register(name, self)
         self.name = name
+        if name:
+            _register(name, self)
 
 
 def fetch_model(name):
@@ -69,10 +73,4 @@ def get_model(name):
     -------
     Model
     """
-    try:
-        scope = get_variable_scope().name
-        name_ = '{}/{}'.format(scope, name) if scope else name
-        return _MODELS[name_]
-    except KeyError:
-        pass
-    return _MODELS[name]
+    return _retrieve(name)
