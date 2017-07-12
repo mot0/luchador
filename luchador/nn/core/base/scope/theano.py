@@ -11,37 +11,37 @@ _LG = logging.getLogger(__name__)
 
 ###############################################################################
 _CURRENT_REUSE_FLAG = False
-_CURRENT_VARIABLE_SCOPE = ''
+_CURRENT_VARIABLE_SCOPE = '/'
 
 
 def _set_flag(flag):
-    """Set reuse flag. Internal user only"""
+    """Set reuse flag. Internal use only"""
     # pylint: disable=global-statement
     global _CURRENT_REUSE_FLAG
     _CURRENT_REUSE_FLAG = flag
 
 
 def _set_scope(scope):
-    """Set scope value. Internal user only"""
+    """Set scope value. Internal use only"""
     # pylint: disable=global-statement
     global _CURRENT_VARIABLE_SCOPE
     _CURRENT_VARIABLE_SCOPE = scope
 
 
 def _get_flag():
-    """Get reuse flag. Internal user only"""
+    """Get reuse flag. Internal use only"""
     return _CURRENT_REUSE_FLAG
 
 
 def _get_scope():
-    """Get scope value. Internal user only"""
+    """Get scope value. Internal use only"""
     return _CURRENT_VARIABLE_SCOPE
 
 
 def _reset():
     """Reset variable scope and remove cached variables. For Testing"""
     _set_flag(False)
-    _set_scope('')
+    _set_scope('/')
 ###############################################################################
 
 
@@ -61,7 +61,11 @@ def name_scope(  # pylint: disable=unused-argument
 
 class VariableScope(object):
     """Mock Tensorflow's VariableScope to provide variable name space"""
-    def __init__(self, reuse, name=''):
+    def __init__(self, reuse, name='/'):
+        name = (
+            name if name.startswith('/') else
+            '/'.join([_get_scope(), name])
+        )
         self.name = name
         self.reuse = reuse
 
@@ -101,12 +105,7 @@ def variable_scope(name_or_scope, reuse=None):
         if reuse:
             return VariableScope(reuse, name_or_scope.name)
         return name_or_scope
-
-    scope = (
-        '{}/{}'.format(_get_scope(), name_or_scope)
-        if _get_scope() else name_or_scope
-    )
-    return VariableScope(reuse, scope)
+    return VariableScope(reuse, name_or_scope)
 
 
 def get_variable_scope():
