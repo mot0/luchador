@@ -66,7 +66,7 @@ class Pool2D(layer.Pool2D, BaseLayer):
         ``max`` or ``average``. Theano backend also supports ``sum``.
         Default: ``max``.
 
-    name : str
+    scope : str
         Used as base scope when building parameters and output
 
     Notes
@@ -76,7 +76,7 @@ class Pool2D(layer.Pool2D, BaseLayer):
     """
     def __init__(
             self, kernel_height, kernel_width, strides, mode='max',
-            padding='VALID', name='Pool2D'):
+            padding='VALID', scope='Pool2D'):
         super(Pool2D, self).__init__(
             kernel_height=kernel_height, kernel_width=kernel_width,
-            strides=strides, mode=mode, padding=padding, name=name)
+            strides=strides, mode=mode, padding=padding, scope=scope)
