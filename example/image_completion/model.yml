@@ -1,0 +1,98 @@
+generator: &generator
+  typename: Sequential
+  args:
+    layer_configs:
+      - typename: Dense
+        args:
+          scope: gen_layer0/Dense
+          n_nodes: 8192
+      - typename: Reshape
+        args:
+          scope: gen_layer0/Reshape
+          shape: [32, 4, 4, 512]
+          shape_format: NHWC
+      - typename: LeakyReLU
+        args:
+          scope: gen_layer0/LeakyReLU
+          alpha: 0.2
+      #----------------------------------------
+      - typename: BatchNormalization
+        args:
+          scope: gen_layer0/BN
+      #----------------------------------------
+      - typename: Conv2DTranspose
+        args:
+          scope: gen_layer1/Conv2DTranspose
+          filter_width: 5
+          filter_height: 5
+          n_filters: 512
+          strides: 2
+          padding: same
+          output_shape: [32, 8, 8, 256]
+          output_shape_format: NHWC
+      - typename: LeakyReLU
+        args:
+          scope: gen_layer1/LeakyReLU
+          alpha: 0.2
+      #----------------------------------------
+      - typename: BatchNormalization
+        args:
+          scope: gen_layer1/BN
+      #----------------------------------------
+      - typename: Conv2DTranspose
+        args:
+          scope: gen_layer2/Conv2DTranspose
+          filter_width: 5
+          filter_height: 5
+          n_filters: 256
+          strides: 2
+          padding: same
+          output_shape: [32, 16, 16, 128]
+          output_shape_format: NHWC
+      - typename: LeakyReLU
+        args:
+          scope: gen_layer2/LeakyReLU
+          alpha: 0.2
+      #----------------------------------------
+      - typename: BatchNormalization
+        args:
+          scope: gen_layer2/BN
+      #----------------------------------------
+      - typename: Conv2DTranspose
+        args:
+          scope: gen_layer3/Conv2DTranspose
+          filter_width: 5
+          filter_height: 5
+          n_filters: 128
+          strides: 2
+          padding: same
+          output_shape: [32, 32, 32, 64]
+          output_shape_format: NHWC
+      - typename: LeakyReLU
+        args:
+          scope: gen_layer3/LeakyReLU
+          alpha: 0.2
+      #----------------------------------------
+      - typename: BatchNormalization
+        args:
+          scope: gen_layer3/BN
+      #----------------------------------------
+      - typename: Conv2DTranspose
+        args:
+          scope: gen_layer4/Conv2DTranspose
+          filter_width: 5
+          filter_height: 5
+          n_filters: 64
+          strides: 2
+          padding: same
+          output_shape: [32, 64, 64, 3]
+          output_shape_format: NHWC
+      - typename: Sigmoid
+        args:
+          scope: gen_layer4/Sigmoid
+  
+typename: Container
+args:
+  model_configs:
+    - << : *generator
+      name: generator
