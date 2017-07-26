@@ -204,7 +204,26 @@ def _main():
             summary_type='image',
             global_step=epoch,
             dataset={
-                'Genearated/epoch_{:02d}'.format(epoch): images
+                'Generated_Same_Seed': images
+            },
+            max_outputs=10,
+        )
+
+        images = sess.run(
+            inputs={
+                input_gen: _sample_seed(batch_size, args.n_seeds),
+            },
+            outputs=data_fake,
+            name='generate_samples',
+        )
+        if format_ == 'NCHW':
+            images = images.transpose(0, 2, 3, 1)
+        images = (255 * images).astype(np.uint8)
+        _summary_writer.summarize(
+            summary_type='image',
+            global_step=epoch,
+            dataset={
+                'Generated_Random': images
             },
             max_outputs=10,
         )
