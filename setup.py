@@ -11,7 +11,9 @@ def _setup():
     setuptools.setup(
         name='luchador',
         version='0.12.0',
-        packages=setuptools.find_packages(),
+        packages=setuptools.find_packages(
+            exclude=['tests*', 'example*']
+        ),
         test_suite='tests.unit',
         install_requires=[
             'six',
